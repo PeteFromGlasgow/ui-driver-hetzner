@@ -227,18 +227,19 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   }),
                   placementGroupChoices: placementGroups.placement_groups
                 });
-                _context.next = 20;
+                _context.next = 21;
                 break;
 
               case 17:
                 _context.prev = 17;
                 _context.t0 = _context["catch"](2);
+                console.log(_context.t0);
                 this.setProperties({
                   errors: ['Error received from Hetzner Cloud: ' + _context.t0.message],
                   gettingData: false
                 });
 
-              case 20:
+              case 21:
               case "end":
                 return _context.stop();
             }
@@ -290,6 +291,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
       var filterString = "?" + Object.keys(filters).map(function (key) {
         return "".concat(key, "=").concat(filters[key]);
       }).join("&");
+      console.log('Requesting: ', 'https://api.hetzner.cloud' + path + filterString === '?' ? '' : filterString);
       return fetch('https://api.hetzner.cloud' + path + filterString === '?' ? '' : filterString, {
         headers: {
           'Authorization': 'Bearer ' + this.get('model.hetznerConfig.apiToken')
