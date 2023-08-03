@@ -1,6 +1,6 @@
 "use strict";
 
-define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/node-driver", "./hetzner"], function (exports, _nodeDriver, _hetzner) {
+define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/node-driver"], function (exports, _nodeDriver) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
