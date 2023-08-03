@@ -260,8 +260,8 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
 
               case 4:
                 allImages = _context2.sent.images;
-                this.set('model.hetznerConfig.images', allImages.sort(function (a, b) {
-                  return a.cores > b.cores ? -1 : 1;
+                this.set('imageChoices', allImages.sort(function (a, b) {
+                  return a.name > b.name ? -1 : 1;
                 }));
 
               case 6:
