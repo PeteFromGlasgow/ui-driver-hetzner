@@ -256,7 +256,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                 });
                 this.set('model.hetznerConfig.serverLocation', options[0].value);
                 _context2.next = 4;
-                return regeneratorRuntime.awrap(this.apiRequest('/v1/images' + options[0].value));
+                return regeneratorRuntime.awrap(this.apiRequest('/v1/images'));
 
               case 4:
                 allImages = _context2.sent.images;
