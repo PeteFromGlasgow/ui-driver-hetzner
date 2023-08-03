@@ -292,7 +292,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
         return "".concat(key, "=").concat(filters[key]);
       }).join("&");
       console.log('Requesting: ', 'https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString));
-      return fetch('https://api.hetzner.cloud' + path + filterString === '?' ? '' : filterString, {
+      return fetch('https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString), {
         headers: {
           'Authorization': 'Bearer ' + this.get('model.hetznerConfig.apiToken')
         }
