@@ -131,17 +131,29 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
     config: alias('model.hetznerConfig'),
     app: service(),
     init: function init() {
+      var _this = this;
+
       var decodedLayout = window.atob(LAYOUT);
       var template = Ember.HTMLBars.compile(decodedLayout, {
         moduleName: 'nodes/components/driver-hetzner/template'
       });
       set(this, 'layout', template);
+      var apiToken = this.get('model.hetznerConfig.apiToken');
+
+      if (apiToken) {
+        (0, _hetzner.apiRequest)(apiToken, '/v1/locations').then(function () {
+          return _this.set('needAPIToken', false);
+        }).catch(function () {
+          return _this.set('needAPIToken', true);
+        });
+        this.actions.getData();
+      } else {
+        this.set('needAPIToken', true);
+      }
 
       this._super.apply(this, arguments);
     },
     bootstrap: function bootstrap() {
-      var _this = this;
-
       var config = get(this, 'globalStore').createRecord({
         type: 'hetznerConfig',
         additionalKey: [],
@@ -157,18 +169,6 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
         placementGroup: ''
       });
       set(this, 'model.hetznerConfig', config);
-      var apiToken = this.get('model.hetznerConfig.apiToken');
-
-      if (apiToken) {
-        (0, _hetzner.apiRequest)(apiToken, '/v1/locations').then(function () {
-          return _this.set('needAPIToken', false);
-        }).catch(function () {
-          return _this.set('needAPIToken', true);
-        });
-        this.actions.getData();
-      } else {
-        this.set('needAPIToken', true);
-      }
     },
     validate: function validate() {
       this._super();
