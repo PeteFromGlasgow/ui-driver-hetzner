@@ -128,7 +128,6 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
   var service = Ember.inject.service;
   exports.default = Ember.Component.extend(_nodeDriver.default, {
     driverName: 'hetzner',
-    needAPIToken: true,
     config: alias('model.hetznerConfig'),
     app: service(),
     init: function init() {
@@ -141,6 +140,8 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
       this._super.apply(this, arguments);
     },
     bootstrap: function bootstrap() {
+      var _this = this;
+
       var config = get(this, 'globalStore').createRecord({
         type: 'hetznerConfig',
         additionalKey: [],
@@ -156,6 +157,17 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
         placementGroup: ''
       });
       set(this, 'model.hetznerConfig', config);
+      var apiToken = this.get('model.hetznerConfig.apiToken');
+
+      if (apiToken) {
+        (0, _hetzner.apiRequest)(apiToken, '/v1/locations').then(function () {
+          return _this.set('needAPIToken', false);
+        }).catch(function () {
+          return _this.set('needAPIToken', true);
+        });
+      } else {
+        this.set('needAPIToken', true);
+      }
     },
     validate: function validate() {
       this._super();
@@ -349,12 +361,12 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
         this._super(labels);
       },
       modifyKeys: function modifyKeys(select) {
-        var _this = this;
+        var _this2 = this;
 
         var options = _toConsumableArray(select.target.options).filter(function (o) {
           return o.selected;
         }).map(function (o) {
-          return _this.keyChoices.find(function (keyChoice) {
+          return _this2.keyChoices.find(function (keyChoice) {
             return keyChoice.id == o.value;
           })["public_key"];
         });
