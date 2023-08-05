@@ -1,6 +1,6 @@
 "use strict";
 
-define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/node-driver"], function (exports, _nodeDriver) {
+define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/node-driver", "./hetzner"], function (exports, _nodeDriver, _hetzner) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -177,18 +177,19 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
     },
     actions: {
       getData: function getData() {
-        var _ref, _ref2, locations, serverTypes, sshKeys, firewalls, placementGroups;
+        var apiKey, _ref, _ref2, locations, serverTypes, sshKeys, firewalls, placementGroups;
 
         return regeneratorRuntime.async(function getData$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 this.set('gettingData', true);
-                _context.prev = 1;
-                _context.next = 4;
-                return regeneratorRuntime.awrap(Promise.all([this.apiRequest('/v1/locations'), this.apiRequest('/v1/server_types'), this.apiRequest('/v1/ssh_keys'), this.apiRequest('/v1/firewalls'), this.apiRequest('/v1/placement_groups')]));
+                apiKey = this.get('model.hetznerConfig.apiToken');
+                _context.prev = 2;
+                _context.next = 5;
+                return regeneratorRuntime.awrap(Promise.all([(0, _hetzner.apiRequest)(apiKey, '/v1/locations'), (0, _hetzner.apiRequest)(apiKey, '/v1/server_types'), (0, _hetzner.apiRequest)(apiKey, '/v1/ssh_keys'), (0, _hetzner.apiRequest)(apiKey, '/v1/firewalls'), (0, _hetzner.apiRequest)(apiKey, '/v1/placement_groups')]));
 
-              case 4:
+              case 5:
                 _ref = _context.sent;
                 _ref2 = _slicedToArray(_ref, 5);
                 locations = _ref2[0];
@@ -216,31 +217,32 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   }),
                   placementGroupChoices: placementGroups.placement_groups
                 });
-                _context.next = 18;
+                _context.next = 19;
                 break;
 
-              case 14:
-                _context.prev = 14;
-                _context.t0 = _context["catch"](1);
+              case 15:
+                _context.prev = 15;
+                _context.t0 = _context["catch"](2);
                 console.log(_context.t0);
                 this.setProperties({
                   errors: ['Error received from Hetzner Cloud: ' + _context.t0.message],
                   gettingData: false
                 });
 
-              case 18:
+              case 19:
               case "end":
                 return _context.stop();
             }
           }
-        }, null, this, [[1, 14]]);
+        }, null, this, [[2, 15]]);
       },
       updateServerLocation: function updateServerLocation(select) {
-        var options, regionChoices, regionDetails, allImages, allNetworks, regionNetworks;
+        var apiKey, options, regionChoices, regionDetails, allImages, allNetworks, regionNetworks;
         return regeneratorRuntime.async(function updateServerLocation$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
+                apiKey = this.get('model.hetznerConfig.apiToken');
                 options = _toConsumableArray(select.target.options).filter(function (o) {
                   return o.selected;
                 });
@@ -249,17 +251,17 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   return i.name == options[0].value;
                 })[0];
                 this.set('model.hetznerConfig.serverLocation', options[0].value);
-                _context2.next = 6;
-                return regeneratorRuntime.awrap(this.apiRequest('/v1/images', {
+                _context2.next = 7;
+                return regeneratorRuntime.awrap((0, _hetzner.apiRequest)(apiKey, '/v1/images', {
                   type: 'system'
                 }));
 
-              case 6:
+              case 7:
                 allImages = _context2.sent.images;
-                _context2.next = 9;
-                return regeneratorRuntime.awrap(this.apiRequest('/v1/networks'));
+                _context2.next = 10;
+                return regeneratorRuntime.awrap((0, _hetzner.apiRequest)(apiKey, '/v1/networks'));
 
-              case 9:
+              case 10:
                 allNetworks = _context2.sent.networks;
                 regionNetworks = allNetworks.filter(function (i) {
                   return i.subnets.reduce(function (acc, a) {
@@ -275,7 +277,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   return a.name > b.name ? 1 : -1;
                 }));
 
-              case 13:
+              case 14:
               case "end":
                 return _context2.stop();
             }
@@ -321,20 +323,6 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
 
         this.set('model.hetznerConfig.additionalKey', options);
       }
-    },
-    apiRequest: function apiRequest(path) {
-      var filters = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var filterString = "?" + Object.keys(filters).map(function (key) {
-        return "".concat(key, "=").concat(filters[key]);
-      }).join("&");
-      console.log('Requesting: ', 'https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString));
-      return fetch('https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString), {
-        headers: {
-          'Authorization': 'Bearer ' + this.get('model.hetznerConfig.apiToken')
-        }
-      }).then(function (res) {
-        return res.ok ? res.json() : Promise.reject(res.json());
-      });
     }
   });
 });;
