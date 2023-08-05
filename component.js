@@ -409,7 +409,7 @@ define("nodes/components/driver-hetzner/hetzner", ["exports"], function (exports
             allNetworks = _context2.sent.networks;
             return _context2.abrupt("return", allNetworks.filter(function (i) {
               return i.subnets.reduce(function (acc, a) {
-                return acc || a.network_zone === regionDetails.network_zone;
+                return acc || a.network_zone === zone;
               }, false);
             }));
 
