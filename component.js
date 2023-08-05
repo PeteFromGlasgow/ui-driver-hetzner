@@ -177,7 +177,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
     },
     actions: {
       getData: function getData() {
-        var _ref, _ref2, locations, images, serverTypes, networks, sshKeys, firewalls, placementGroups;
+        var _ref, _ref2, locations, serverTypes, sshKeys, firewalls, placementGroups;
 
         return regeneratorRuntime.async(function getData$(_context) {
           while (1) {
@@ -186,34 +186,24 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                 this.set('gettingData', true);
                 _context.prev = 1;
                 _context.next = 4;
-                return regeneratorRuntime.awrap(Promise.all([this.apiRequest('/v1/locations'), this.apiRequest('/v1/images'), this.apiRequest('/v1/server_types'), this.apiRequest('/v1/networks'), this.apiRequest('/v1/ssh_keys'), this.apiRequest('/v1/firewalls'), this.apiRequest('/v1/placement_groups')]));
+                return regeneratorRuntime.awrap(Promise.all([this.apiRequest('/v1/locations'), this.apiRequest('/v1/server_types'), this.apiRequest('/v1/ssh_keys'), this.apiRequest('/v1/firewalls'), this.apiRequest('/v1/placement_groups')]));
 
               case 4:
                 _ref = _context.sent;
-                _ref2 = _slicedToArray(_ref, 7);
+                _ref2 = _slicedToArray(_ref, 5);
                 locations = _ref2[0];
-                images = _ref2[1];
-                serverTypes = _ref2[2];
-                networks = _ref2[3];
-                sshKeys = _ref2[4];
-                firewalls = _ref2[5];
-                placementGroups = _ref2[6];
+                serverTypes = _ref2[1];
+                sshKeys = _ref2[2];
+                firewalls = _ref2[3];
+                placementGroups = _ref2[4];
                 this.setProperties({
                   errors: [],
                   needAPIToken: false,
                   gettingData: false,
                   regionChoices: locations.locations,
-                  imageChoices: images.images.map(function (image) {
-                    return _objectSpread({}, image, {
-                      id: image.id.toString()
-                    });
-                  }),
+                  imageChoices: [],
                   sizeChoices: serverTypes.server_types,
-                  networkChoices: networks.networks.map(function (network) {
-                    return _objectSpread({}, network, {
-                      id: network.id.toString()
-                    });
-                  }),
+                  networkChoices: [],
                   keyChoices: sshKeys.ssh_keys.map(function (key) {
                     return _objectSpread({}, key, {
                       id: key.id.toString()
@@ -226,11 +216,11 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   }),
                   placementGroupChoices: placementGroups.placement_groups
                 });
-                _context.next = 20;
+                _context.next = 18;
                 break;
 
-              case 16:
-                _context.prev = 16;
+              case 14:
+                _context.prev = 14;
                 _context.t0 = _context["catch"](1);
                 console.log(_context.t0);
                 this.setProperties({
@@ -238,15 +228,15 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                   gettingData: false
                 });
 
-              case 20:
+              case 18:
               case "end":
                 return _context.stop();
             }
           }
-        }, null, this, [[1, 16]]);
+        }, null, this, [[1, 14]]);
       },
       updateServerLocation: function updateServerLocation(select) {
-        var options, allImages;
+        var options, regionChoices, regionDetails, allImages, allNetworks, regionNetworks;
         return regeneratorRuntime.async(function updateServerLocation$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
@@ -254,17 +244,38 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
                 options = _toConsumableArray(select.target.options).filter(function (o) {
                   return o.selected;
                 });
+                regionChoices = this.get('regionChoices');
+                regionDetails = regionChoices.filter(function (i) {
+                  return i.name == options[0].value;
+                })[0];
                 this.set('model.hetznerConfig.serverLocation', options[0].value);
-                _context2.next = 4;
-                return regeneratorRuntime.awrap(this.apiRequest('/v1/images'));
-
-              case 4:
-                allImages = _context2.sent.images;
-                this.set('imageChoices', allImages.sort(function (a, b) {
-                  return a.name > b.name ? -1 : 1;
+                _context2.next = 6;
+                return regeneratorRuntime.awrap(this.apiRequest('/v1/images', {
+                  type: 'system'
                 }));
 
               case 6:
+                allImages = _context2.sent.images;
+                _context2.next = 9;
+                return regeneratorRuntime.awrap(this.apiRequest('/v1/networks'));
+
+              case 9:
+                allNetworks = _context2.sent.networks;
+                regionNetworks = allNetworks.filter(function (i) {
+                  return i.subnets.reduce(function (acc, a) {
+                    return acc || a.network_zone === regionDetails.network_zone;
+                  }, false);
+                }).map(function (i) {
+                  return _objectSpread({}, i, {
+                    id: i.id.toString()
+                  });
+                });
+                this.set('networkChoices', regionNetworks);
+                this.set('imageChoices', allImages.sort(function (a, b) {
+                  return a.name > b.name ? 1 : -1;
+                }));
+
+              case 13:
               case "end":
                 return _context2.stop();
             }
