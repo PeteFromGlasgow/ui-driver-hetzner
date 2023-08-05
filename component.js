@@ -328,6 +328,70 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
 });;
 "use strict";
 
+define("nodes/components/driver-hetzner/hetzner", ["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.apiRequest = apiRequest;
+
+  var filterArrayToQuerystring = function filterArrayToQuerystring(key, filterValues) {
+    return filterValues.map(function (i) {
+      return key + '=' + i;
+    }).join('&');
+  };
+
+  var filtersToQueryString = function filtersToQueryString(filters) {
+    return Object.keys(filters).map(function (key) {
+      return !Array.isArray(filters[key]) ? "".concat(key, "=").concat(filters[key]) : filterArrayToQuerystring(key, filters[key]);
+    }).join("&");
+  };
+
+  function apiRequest(key, path) {
+    var filters,
+        filterString,
+        _args = arguments;
+    return regeneratorRuntime.async(function apiRequest$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            filters = _args.length > 2 && _args[2] !== undefined ? _args[2] : {};
+            filterString = "?" + filtersToQueryString(filters);
+            console.log('Requesting: ', 'https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString));
+            return _context.abrupt("return", fetch('https://api.hetzner.cloud' + path + (filterString === '?' ? '' : filterString), {
+              headers: {
+                'Authorization': "Bearer ".concat(key)
+              }
+            }).then(function (res) {
+              return res.ok ? res.json() : Promise.reject(res.json());
+            }));
+
+          case 4:
+          case "end":
+            return _context.stop();
+        }
+      }
+    });
+  }
+});;
+"use strict";
+
+define("ui/components/driver-hetzner/hetzner", ["exports", "nodes/components/driver-hetzner/hetzner"], function (exports, _hetzner) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(exports, "default", {
+    enumerable: true,
+    get: function () {
+      return _hetzner.default;
+    }
+  });
+});;
+"use strict";
+
 define("ui/components/driver-hetzner/component", ["exports", "nodes/components/driver-hetzner/component"], function (exports, _component) {
   "use strict";
 
