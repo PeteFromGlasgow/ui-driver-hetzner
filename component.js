@@ -165,6 +165,7 @@ define("nodes/components/driver-hetzner/component", ["exports", "shared/mixins/n
         }).catch(function () {
           return _this.set('needAPIToken', true);
         });
+        this.actions.getData();
       } else {
         this.set('needAPIToken', true);
       }
